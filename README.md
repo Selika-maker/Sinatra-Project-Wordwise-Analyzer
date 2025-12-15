@@ -1,20 +1,5 @@
-# sinatra-template
+# Word Counter
 
-Use this repository to create new Sinatra apps. 
+This software is developed for the purpose of counting the number of words in any given document.
 
-Optionally, to use `ActiveRecord` for database operations, add to the `app.rb`:
-
-```ruby
-require "sinatra/activerecord"
-```
-
-And in the `config/environment.rb` file add this code block:
-
-```ruby
-configure do
-  # setup a database connection
-  set(:database, { adapter: "sqlite3", database: "db/development.sqlite3" })
-end
-```
-
-Some rights reserved — see [LICENSE.txt](LICENSE.txt)
+It accepts any type of documentation-based file, such as .txt, .pdf, .docx, and .odf. 
