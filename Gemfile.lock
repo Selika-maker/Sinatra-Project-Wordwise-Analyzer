@@ -20,6 +20,7 @@ GEM
       coderay (>= 1.0.0)
       erubi (>= 1.0.0)
       rack (>= 0.9.0)
+    bigdecimal (3.3.1)
     binding_of_caller (1.0.0)
       debug_inspector (>= 0.0.1)
     capybara (3.39.2)
@@ -38,6 +39,7 @@ GEM
     concurrent-ruby (1.2.2)
     crack (0.4.5)
       rexml
+    csv (3.3.5)
     debug_inspector (1.1.0)
     diff-lcs (1.5.0)
     domain_name (0.6.20240107)
@@ -76,6 +78,10 @@ GEM
     http-cookie (1.0.7)
       domain_name (~> 0.5)
     http-form_data (2.3.0)
+    httparty (0.23.2)
+      csv
+      mini_mime (>= 1.0.0)
+      multi_xml (>= 0.5.2)
     i18n (1.12.0)
       concurrent-ruby (~> 1.0)
     json (2.10.2)
@@ -88,6 +94,8 @@ GEM
     mini_mime (1.1.5)
     minitest (5.18.1)
     multi_json (1.15.0)
+    multi_xml (0.7.2)
+      bigdecimal (~> 3.1)
     mustermann (3.0.0)
       ruby2_keywords (~> 0.0.1)
     net-http (0.6.0)
@@ -193,6 +201,7 @@ DEPENDENCIES
   draft_matchers
   grade_runner (~> 0.0.13)
   http
+  httparty
   i18n
   pry
   puma (~> 5.0)

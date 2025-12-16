@@ -1,12 +1,32 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <title>Sinatra Template</title>
+    <title>Word Counter</title>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   </head>
 
   <body>
-    <%= yield %>
+    <div class="container">
+      <%= yield %>
+    </div>
+    
+    <script>
+      // Live character counter
+      document.addEventListener('DOMContentLoaded', function() {
+        const textarea = document.querySelector('textarea');
+        const charCounter = document.querySelector('.char-counter');
+        
+        if (textarea && charCounter) {
+          textarea.addEventListener('input', function() {
+            charCounter.textContent = this.value.length;
+          });
+        }
+      });
+    </script>
   </body>
 </html>
