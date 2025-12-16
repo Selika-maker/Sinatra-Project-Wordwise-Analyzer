@@ -8,7 +8,10 @@ require "json"
 module WordCounter
   def self.count_words(text)
     return 0 if text.nil? || text.empty?
-    text.scan(/\w+/).size
+    
+    # Match words including contractions, hyphenated words, and apostrophes
+    words = text.scan(/\b(?:[a-z]+(?:['-][a-z]+)?)+\b/i)
+    words.size
   end
 
   def self.count_characters(text)
@@ -26,10 +29,32 @@ module WordCounter
   def self.most_common_words(text, limit = 5)
     return [] if text.nil? || text.empty?
     
-    words = text.downcase.scan(/\b[a-z]{3,}\b/)
-    stop_words = %w[the and to of a in for is on that by this with i you it not or be are from at as your all have new more an was we will can just]
+    # Use the same word detection as count_words, but downcase
+    words = text.downcase.scan(/\b(?:[a-z]+(?:['-][a-z]+)?)+\b/)
     
-    words.reject! { |word| stop_words.include?(word) }
+    # Extended stop words list including contractions
+    stop_words = %w[
+      the and to of a in for is on that by this with i you it not or be are from 
+      at as your all have new more an was we will can just its 
+      # Contractions:
+      don't doesn't didn't isn't aren't wasn't weren't hasn't haven't hadn't 
+      won't wouldn't can't couldn't shouldn't mightn't mustn't 
+      i'm you're he's she's it's we're they're that's who's what's 
+      i've you've we've they've could've should've would've 
+      i'll you'll he'll she'll it'll we'll they'll 
+      i'd you'd he'd she'd we'd they'd 
+      # Other common words to filter
+      about am any but by can com could did do does doing down each 
+      few for from had has have he her here him himself his how if 
+      into is it its just me my myself no nor not now of off on once 
+      only or other our ours ourselves out over own said same she so 
+      some such than that the their theirs them themselves then there 
+      these they this those through too under until up very was we 
+      were what when where which while who whom why with would you 
+      your yours yourself yourselves
+    ]
+    
+    words.reject! { |word| stop_words.include?(word) || word.length < 3 }
     
     word_counts = words.each_with_object(Hash.new(0)) do |word, counts|
       counts[word] += 1
