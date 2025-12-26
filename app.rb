@@ -68,13 +68,14 @@ end
 module DictionaryAPI
   def self.lookup(word)
     begin
+      # Increased timeout from 3 to 10 seconds
       response = HTTParty.get(
         "https://api.dictionaryapi.dev/api/v2/entries/en/#{word}",
         headers: {
           'Content-Type' => 'application/json',
           'Accept' => 'application/json'
         },
-        timeout: 3
+        timeout: 10  # Increased timeout
       )
       
       if response.success?
@@ -109,19 +110,35 @@ module DictionaryAPI
       }
     end
   end
+  
+  # NEW: Lookup multiple words with error handling
+  def self.lookup_multiple(words, max_words = 3)
+    definitions = []
+    
+    words.first(max_words).each do |word, _|
+      definition = lookup(word)
+      definitions << definition if definition[:success]
+      
+      # Small delay to avoid overwhelming the API
+      sleep(0.1) if definitions.length < words.first(max_words).length
+    end
+    
+    definitions
+  end
 end
 
 # Advice Slip API for random advice
 module AdviceAPI
   def self.fetch_random_advice
     begin
+      # Increased timeout from 3 to 10 seconds
       response = HTTParty.get(
         'https://api.adviceslip.com/advice',
         headers: {
           'Content-Type' => 'application/json',
           'Accept' => 'application/json'
         },
-        timeout: 3
+        timeout: 10  # Increased timeout
       )
       
       if response.success?
@@ -158,7 +175,7 @@ module AdviceAPI
     end
   end
   
-  # New method to get just the advice text for the text box
+  # Method to get just the advice text for the text box
   def self.fetch_advice_for_textbox
     advice_data = fetch_random_advice
     advice_data[:success] ? advice_data[:advice] : "Failed to fetch advice. Please try again."
@@ -187,11 +204,11 @@ post "/analyze" do
   @common_words = WordCounter.most_common_words(@text)
   @reading_time = [(@word_count / 200.0).ceil, 1].max
   
-  # Fetch definition for the most common word (if any)
-  @word_definition = nil
+  # NEW: Fetch definitions for multiple most common words (up to 3)
+  @word_definitions = []
   if @common_words.any?
-    most_common_word = @common_words[0][0]  # [0] is the word, [1] is the count
-    @word_definition = DictionaryAPI.lookup(most_common_word)
+    # Get definitions for up to 3 most common words
+    @word_definitions = DictionaryAPI.lookup_multiple(@common_words, 3)
   end
   
   # Fetch advice from Advice Slip API
