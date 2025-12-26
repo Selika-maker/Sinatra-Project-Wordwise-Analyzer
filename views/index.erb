@@ -289,18 +289,19 @@
         <% end %>
         
         <!-- Dictionary API Result -->
-        <% if @word_definition %>
-          <% if @word_definition[:success] %>
-            <div class="api-box">
-              <h3><span></span> Dictionary Definition for "<%= @word_definition[:word] %>":</h3>
-              <p><%= @word_definition[:definition] %></p>
-              <div class="api-label">Powered by Dictionary API</div>
-            </div>
-          <% else %>
-            <div class="error-box">
-              <p>Could not fetch definition: <%= @word_definition[:error] %></p>
-            </div>
-          <% end %>
+        <% if @word_definitions.any? %>
+          <div class="api-box">
+            <h3><span></span> Dictionary Definitions:</h3>
+            <% @word_definitions.each do |definition| %>
+              <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #e0e0e0;">
+                <h4 style="color: #667eea; margin-bottom: 8px;">
+                  <%= definition[:word].capitalize %>
+                </h4>
+                <p style="margin: 0;"><%= definition[:definition] %></p>
+              </div>
+            <% end %>
+            <div class="api-label">Powered by Dictionary API</div>
+          </div>
         <% end %>
         
         <!-- Advice Slip API Result -->
