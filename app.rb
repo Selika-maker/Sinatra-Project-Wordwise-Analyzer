@@ -68,14 +68,14 @@ end
 module DictionaryAPI
   def self.lookup(word)
     begin
-      # Increased timeout from 3 to 10 seconds
+      # VERY generous timeout - 30 seconds to prevent any timeouts
       response = HTTParty.get(
         "https://api.dictionaryapi.dev/api/v2/entries/en/#{word}",
         headers: {
           'Content-Type' => 'application/json',
           'Accept' => 'application/json'
         },
-        timeout: 10  # Increased timeout
+        timeout: 30  # 30 SECONDS - extremely generous timeout
       )
       
       if response.success?
@@ -102,6 +102,18 @@ module DictionaryAPI
           success: false
         }
       end
+    rescue HTTParty::Error => e
+      {
+        word: word,
+        error: "HTTP Error: #{e.message}",
+        success: false
+      }
+    rescue Net::ReadTimeout => e
+      {
+        word: word,
+        error: "Connection timeout after 30 seconds",
+        success: false
+      }
     rescue => e
       {
         word: word,
@@ -111,7 +123,7 @@ module DictionaryAPI
     end
   end
   
-  # NEW: Lookup multiple words with error handling
+  # Lookup multiple words with error handling
   def self.lookup_multiple(words, max_words = 3)
     definitions = []
     
@@ -131,14 +143,14 @@ end
 module AdviceAPI
   def self.fetch_random_advice
     begin
-      # Increased timeout from 3 to 10 seconds
+      # VERY generous timeout - 30 seconds to prevent any timeouts
       response = HTTParty.get(
         'https://api.adviceslip.com/advice',
         headers: {
           'Content-Type' => 'application/json',
           'Accept' => 'application/json'
         },
-        timeout: 10  # Increased timeout
+        timeout: 30  # 30 SECONDS - extremely generous timeout
       )
       
       if response.success?
@@ -167,6 +179,11 @@ module AdviceAPI
         error: "HTTP Error: #{e.message}",
         success: false
       }
+    rescue Net::ReadTimeout => e
+      {
+        error: "Connection timeout after 30 seconds",
+        success: false
+      }
     rescue StandardError => e
       {
         error: "Error: #{e.message}",
@@ -190,7 +207,28 @@ end
 # New route to get advice for textbox (returns JSON)
 get "/get_advice" do
   content_type :json
-  { advice: AdviceAPI.fetch_advice_for_textbox }.to_json
+  
+  # Very generous timeout for the advice endpoint
+  advice_text = nil
+  begin
+    # Try with 30-second timeout
+    response = HTTParty.get(
+      'https://api.adviceslip.com/advice',
+      timeout: 30  # 30 SECONDS - extremely generous
+    )
+    
+    if response.success?
+      data = JSON.parse(response.body)
+      advice_text = data['slip']['advice'] if data['slip']
+    end
+  rescue Net::ReadTimeout => e
+    advice_text = "Even with patience, sometimes connections take time. Try again or trust your instincts."
+  rescue => e
+    # If it fails, return a fallback
+    advice_text = "Sometimes the best advice is to trust your own judgment and keep moving forward."
+  end
+  
+  { advice: advice_text || "Take things one step at a time. Persistence often leads to success." }.to_json
 end
 
 post "/analyze" do
@@ -204,7 +242,7 @@ post "/analyze" do
   @common_words = WordCounter.most_common_words(@text)
   @reading_time = [(@word_count / 200.0).ceil, 1].max
   
-  # NEW: Fetch definitions for multiple most common words (up to 3)
+  # Fetch definitions for multiple most common words (up to 3)
   @word_definitions = []
   if @common_words.any?
     # Get definitions for up to 3 most common words
